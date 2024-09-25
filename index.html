@@ -97,6 +97,7 @@
         
         function updateDeconflcitStrategy(event) {
           layer.labelingInfo[0].deconflictionStrategy = event.target.value;
+          layer.refresh();
         }
 
         view.whenLayerView(layer).then((layerView) => {
