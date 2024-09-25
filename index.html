@@ -1,0 +1,138 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Filter features by attribute | Sample | ArcGIS Maps SDK for JavaScript 4.30</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/next/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/next/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #seasons-filter {
+        height: 160px;
+        width: 100%;
+        visibility: hidden;
+      }
+
+      .season-item {
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        vertical-align: baseline;
+        cursor: pointer;
+        height: 40px;
+      }
+
+      .season-item:focus {
+        background-color: dimgrey;
+      }
+
+      .season-item:hover {
+        background-color: dimgrey;
+      }
+
+      #titleDiv {
+        padding: 10px;
+      }
+
+      #titleText {
+        font-size: 20pt;
+        font-weight: 60;
+        padding-bottom: 10px;
+      }
+    </style>
+    <script>
+      require([
+        "esri/views/MapView",
+        "esri/Map",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Expand",
+        "esri/core/reactiveUtils"
+      ], (MapView, Map, FeatureLayer, Expand, reactiveUtils) => {
+        let floodLayerView;
+
+        // flash flood warnings layer
+        const layer = new FeatureLayer({
+          portalItem: {
+            id: "f9e348953b3848ec8b69964d5bceae02"
+          },
+          outFields: ["SEASON"],
+          labelingInfo: [
+            {
+              labelExpressionInfo: { expression: "$feature.ISSUED" },
+              deconflictionStrategy: 'static',
+              symbol: {
+                type: "text",  // autocasts as new TextSymbol()
+                color: "black",
+                haloSize: 1,
+                haloColor: "white"
+              }
+            }
+          ]
+        });
+
+        const map = new Map({
+          basemap: "gray-vector",
+          layers: [layer]
+        });
+
+        const view = new MapView({
+          map: map,
+          container: "viewDiv",
+          center: [-98, 40],
+          zoom: 4
+        });
+        
+        const deconflictStrategyForm = document.getElementById("deconflictStrategyForm");
+        deconflictStrategyForm.addEventListener("change", updateDeconflcitStrategy);
+        
+        function updateDeconflcitStrategy(event) {
+          layer.labelingInfo[0].deconflictionStrategy = event.target.value;
+        }
+
+        view.whenLayerView(layer).then((layerView) => {
+          // flash flood warnings layer loaded
+          // get a reference to the flood warnings layerview
+          floodLayerView = layerView;
+          
+          floodLayerView.filter = {
+            where: "SEASON = 'Winter'"
+          };
+          view.ui.add("titleDiv", "top-right");
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="titleDiv" class="esri-widget">
+      <div id="titleText">Flash Floods by Season</div>
+      <div>Flash Flood Warnings (2002 - 2012)</div>
+      <form id="deconflictStrategyForm">
+        <fieldset>
+          <legend>Deconflict Strategy:</legend>
+        
+          <div>
+            <input type="radio" name="strategy" value="none" />
+            <label for="none">None</label>
+          </div>
+        
+          <div>
+            <input type="radio" name="strategy" value="static" checked />
+            <label for="static">Static</label>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </body>
+</html>
